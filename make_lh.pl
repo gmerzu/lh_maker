@@ -68,6 +68,7 @@ my %opts = (help => 0,
 			preserveallarg => 0,
 			path => "",
 			aggressive_replace_add => 5,
+			types => "",
 		);
 
 
@@ -81,6 +82,8 @@ if (-r $RC_FILE)
 	{
 		chomp;
 		/^#/ || /^\s*$/ and next;
+		s/^\s*//;
+		s/\s*$//;
 		my ($n, $v) = split /\s*=\s*/, $_, 2;
 		if ($n =~ s/^\$//)
 		{
@@ -91,7 +94,12 @@ if (-r $RC_FILE)
 		for my $e (@vs)
 		{
 			my @a = ($e);
-			@a = @{$templates{$e}} if $e =~ s/^@//;
+			if ($e =~ s/^@//)
+			{
+				@a = ();
+				push @a, @{$templates{$e}} if $templates{$e};
+				push @a, @{$templates{'@'.$e}} if $templates{'@'.$e};
+			}
 			push @{$templates{$n}}, @a;
 		}
 	}
@@ -155,6 +163,22 @@ sub get_date
 	my @t = localtime(time);
 	my ($month, $mday, $year) = ($months[$t[4]], $t[3], $t[5] + 1900);
 	return "$month $mday, $year";
+}
+
+
+
+my @types = ();
+
+if ($opts{types})
+{
+	@types = split /\s*,\s*/, $opts{types};
+	my @tmp = ();
+	foreach my $t (@types)
+	{
+		push @tmp, @{$templates{$t}} if $templates{$t};
+	}
+	my %types_count = ();
+	@types = grep { $_ if !$types_count{$_}++ } @tmp;
 }
 
 
@@ -262,10 +286,33 @@ say INFO2 . ">> REMOVE MODE ENABLED" . DEFAULT if $opts{remove} || $opts{onlyrem
 say "" if $opts{replace} || $opts{remove} || $opts{onlyremove};
 
 
+
+sub filter_files
+{
+	my $f = shift;
+	my $fext = "";
+	return $f unless @types;
+
+	$fext = lc "$1" if $f =~ /^.+\.([^.]+)$/;
+	return "" unless $fext;
+
+	return $f if grep { $_ eq $f } @dirs;
+	return "" unless grep { $_ eq $fext } @types;
+
+	return $f;
+}
+
+
+@files = grep filter_files($_), @files;
+
+
+
 if (!@files)
 {
 	say WARNING . "!! No input files found" . DEFAULT;
 }
+
+#map { say "to process: $_" } @files;
 
 
 foreach my $f (@files)

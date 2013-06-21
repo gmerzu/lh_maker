@@ -19,6 +19,9 @@ $interactive = 1
 # default path to template variables
 $vars = ~/.lh_maker/vars
 
+# process only these types while searching through the directories passed to the script
+$types = @cpp, perl
+
 # additional paths passed to PATH
 $path = /bin:/usr/bin
 
