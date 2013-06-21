@@ -10,6 +10,9 @@ cmake = cmake
 
 # script variables
 
+# make output in color
+$color = 1
+
 # always work interactively
 $interactive = 1
 
