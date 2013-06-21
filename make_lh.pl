@@ -556,7 +556,10 @@ foreach my $f (@files)
 	{
 		my $f = shift;
 		my $f_noext = shift;
+		my $exts_tmp = shift;
+		my @exts = @$exts_tmp;
 		my $var = shift;
+
 		return $saved_vars{$f}{$var} if $saved_vars{$f}{$var} && $opts{replace} && !$opts{reset};
 		print INFO2 . "-- Write data for $var: ";
 		my $ans_default = "TODO: write $var";
@@ -575,7 +578,7 @@ foreach my $f (@files)
 	$template_content =~ s/\@(\w+)\@/$preserved_vars{$f}{$1} || $vars{$1} || ""/ge;
 	$template_content =~ s/\@\$(\w+)\@/$script_vars{$1} || ""/ge;
 	$template_content =~ s/\@\$ARG\[(\w+)\]\@/$preserved_args{$f}{$1} || $args{$1} || ""/ge;
-	$template_content =~ s/\@\$ASK\[(\w+)\]\@/&read_ans($f_short, $f_short_noext, $1 || "")/ge;
+	$template_content =~ s/\@\$ASK\[(\w+)\]\@/&read_ans($f_short, $f_short_noext, \@exts, $1 || "")/ge;
 #	say $template_content;
 
 
