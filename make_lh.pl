@@ -142,7 +142,8 @@ sub get_groups
 	return @res unless $ext{$e};
 	foreach (@{$ext{$e}})
 	{
-		push @res, $_ if s/^@//;
+		my $g = $_;
+		push @res, $g if $g =~ s/^@//;
 	}
 	return (@res);
 }
@@ -244,7 +245,7 @@ say "";
 $opts{remove} = 1 if $opts{replace};
 $opts{remove} = 1 if $opts{onlyremove};
 $opts{replace} = 0 if $opts{onlyremove};
-$opts{interactive} = 0 if $opts{replace};
+#$opts{interactive} = 0 if $opts{replace};
 
 
 say INFO2 . ">> REPLACE MODE ENABLED" . DEFAULT if $opts{replace};
@@ -260,13 +261,23 @@ if (!@files)
 
 foreach my $f (@files)
 {
-	my $f_short = $1 if $f =~ /^.+\/(.+)$/;
+	my $f_short = $f;
+	$f_short = $1 if $f =~ /^.+\/(.+)$/;
+	my $f_short_origin = $f_short;
 	my $fext = "";
 	$fext = "$1" if $f =~ /^.+\.([^.]+)$/;
 	my $f_noext = $f;
 	$f_noext = "$1" if $f =~ /^(.+)\.[^.]+$/;
+	my $f_short_noext = $f_short;
+	$f_short_noext = "$1" if $f_short =~ /^(.+)\.[^.]+$/;
+
+	$fext = lc $fext;
+	$f_short = lc $f_short;
+	$f_short_noext = lc $f_short_noext;
 
 	$fext = $opts{ext} if $opts{ext};
+
+	my $f_with_header_firstly = 0;
 
 	my @gs = get_groups($fext);
 	my @exts = map { get_exts($_) } @gs;
@@ -357,6 +368,8 @@ foreach my $f (@files)
 				my $r = qr{^$t$};
 				if ($l =~ /$r/)
 				{
+					$f_with_header_firstly = 1;
+
 					foreach my $i (0 .. @pv - 1)
 					{
 						my $rval = '$+{r' . ($i + 1) . '}';
@@ -367,8 +380,8 @@ foreach my $f (@files)
 						if ($h->{t} eq "ask")
 						{
 							say INFO3 . "-- Found $v: $found ... saving for all group files" . DEFAULT;
-							$saved_vars{$f}{$v} = $found;
-							$saved_vars{$f_noext.".".$_}{$v} = $found foreach @exts;
+							$saved_vars{$f_short}{$v} = $found;
+							$saved_vars{$f_short_noext.".".$_}{$v} = $found foreach @exts;
 						}
 						elsif ($h->{t} eq "var")
 						{
@@ -493,15 +506,17 @@ foreach my $f (@files)
 	close $FH;
 
 
+	my $f_with_header = 0;
 	my $check_header_str = join "", @content[0 .. min(4 + $opts{aggressive_replace_add},
 									@content - 1)];
-	if ($check_header_str =~ /$f_short/g)
+	if ($check_header_str =~ /$f_short_origin/g)
 	{
 		say INFO3 . "** File $f seems to be with license" . DEFAULT;
+		$f_with_header = 1;
 		next unless $opts{interactive};
 	}
 
-	if ($opts{interactive})
+	if ($opts{interactive} && (!$f_with_header && !$f_with_header_firstly) && !$opts{reset})
 	{
 		INTERACTIVE:
 		print INFO2 . "-- 1-process, 2-skip, 3-exit : " . DEFAULT;
@@ -534,12 +549,13 @@ foreach my $f (@files)
 	close $TFH;
 
 	my %script_vars = (
-			FILE => $f, FILE_SHORT => $f_short
+			FILE => $f, FILE_SHORT => $f_short_origin
 			);
 
 	sub read_ans
 	{
 		my $f = shift;
+		my $f_noext = shift;
 		my $var = shift;
 		return $saved_vars{$f}{$var} if $saved_vars{$f}{$var} && $opts{replace} && !$opts{reset};
 		print INFO2 . "-- Write data for $var: ";
@@ -559,7 +575,7 @@ foreach my $f (@files)
 	$template_content =~ s/\@(\w+)\@/$preserved_vars{$f}{$1} || $vars{$1} || ""/ge;
 	$template_content =~ s/\@\$(\w+)\@/$script_vars{$1} || ""/ge;
 	$template_content =~ s/\@\$ARG\[(\w+)\]\@/$preserved_args{$f}{$1} || $args{$1} || ""/ge;
-	$template_content =~ s/\@\$ASK\[(\w+)\]\@/&read_ans($f, $1 || "")/ge;
+	$template_content =~ s/\@\$ASK\[(\w+)\]\@/&read_ans($f_short, $f_short_noext, $1 || "")/ge;
 #	say $template_content;
 
 
