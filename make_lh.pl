@@ -516,7 +516,7 @@ foreach my $f (@files)
 		next unless $opts{interactive};
 	}
 
-	if ($opts{interactive} && (!$f_with_header && !$f_with_header_firstly) && !$opts{reset})
+	if ($opts{interactive} && ($f_with_header || !$f_with_header_firstly) && !$opts{reset})
 	{
 		INTERACTIVE:
 		print INFO2 . "-- 1-process, 2-skip, 3-exit : " . DEFAULT;
