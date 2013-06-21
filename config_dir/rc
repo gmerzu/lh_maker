@@ -1,0 +1,21 @@
+# template_name|@template_group = [extension|@template_name|@template_group]...
+
+cpp = cpp cc c h
+bash = sh
+perl = pl
+cmake = cmake
+@cpp = @cpp
+@shell = @bash @perl @cmake
+
+
+# script variables
+
+# always work interactively
+$interactive = 1
+
+# default path to template variables
+$vars = ~/.lh_maker/vars
+
+# additional paths passed to PATH
+$path = /bin:/usr/bin
+
