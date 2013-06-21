@@ -149,6 +149,15 @@ sub get_groups
 }
 
 
+sub get_date
+{
+	my @months = qw( Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec );
+	my @t = localtime(time);
+	my ($month, $mday, $year) = ($months[$t[4]], $t[3], $t[5] + 1900);
+	return "$month $mday, $year";
+}
+
+
 
 my @args_params = ();
 my %args = ();
@@ -380,6 +389,7 @@ foreach my $f (@files)
 						if ($h->{t} eq "ask")
 						{
 							say INFO3 . "-- Found $v: $found ... saving for all group files" . DEFAULT;
+							$saved_vars{$f}{$v} = $found;
 							$saved_vars{$f_short}{$v} = $found;
 							$saved_vars{$f_short_noext.".".$_}{$v} = $found foreach @exts;
 						}
@@ -549,28 +559,32 @@ foreach my $f (@files)
 	close $TFH;
 
 	my %script_vars = (
-			FILE => $f, FILE_SHORT => $f_short_origin
+			FILE => $f, FILE_SHORT => $f_short_origin,
+			DATE => get_date(),
 			);
 
 	sub read_ans
 	{
 		my $f = shift;
-		my $f_noext = shift;
+		my $f_short = shift;
+		my $f_short_noext = shift;
 		my $exts_tmp = shift;
 		my @exts = @$exts_tmp;
 		my $var = shift;
 
 		return $saved_vars{$f}{$var} if $saved_vars{$f}{$var} && $opts{replace} && !$opts{reset};
+		return $saved_vars{$f_short}{$var} if $saved_vars{$f_short}{$var} && $opts{replace} && !$opts{reset};
 		print INFO2 . "-- Write data for $var: ";
 		my $ans_default = "TODO: write $var";
+		$ans_default = $saved_vars{$f_short}{$var} if $saved_vars{$f_short}{$var};
 		$ans_default = $saved_vars{$f}{$var} if $saved_vars{$f}{$var};
 		print "[$ans_default] " . DEFAULT;
 		my $ans = <STDIN>;
 		chomp $ans;
 		if ($ans)
 		{
-			$saved_vars{$f}{$var} = $ans;
-			$saved_vars{$f_noext.".".$_}{$var} = $ans foreach @exts;
+			$saved_vars{$f_short}{$var} = $ans;
+			$saved_vars{$f_short_noext.".".$_}{$var} = $ans foreach @exts;
 		}
 		return $ans || $ans_default;
 	}
@@ -578,7 +592,7 @@ foreach my $f (@files)
 	$template_content =~ s/\@(\w+)\@/$preserved_vars{$f}{$1} || $vars{$1} || ""/ge;
 	$template_content =~ s/\@\$(\w+)\@/$script_vars{$1} || ""/ge;
 	$template_content =~ s/\@\$ARG\[(\w+)\]\@/$preserved_args{$f}{$1} || $args{$1} || ""/ge;
-	$template_content =~ s/\@\$ASK\[(\w+)\]\@/&read_ans($f_short, $f_short_noext, \@exts, $1 || "")/ge;
+	$template_content =~ s/\@\$ASK\[(\w+)\]\@/&read_ans($f, $f_short, $f_short_noext, \@exts, $1 || "")/ge;
 #	say $template_content;
 
 
