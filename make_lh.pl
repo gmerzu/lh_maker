@@ -235,13 +235,22 @@ my %preserved_vars = ();
 my %preserved_args = ();
 
 
-say INFO2 . ">> REPLACE MODE ENABLED" . DEFAULT if $opts{replace};
-say INFO2 . ">> REMOVE MODE ENABLED" . DEFAULT if $opts{remove};
+say INFO . ">> Using vars file: $opts{vars}" . DEFAULT;
+say INFO . ">> Using template file: $opts{template}" . DEFAULT if $opts{template};
+say INFO . ">> Using alternative template file: $opts{newtemplate}" . DEFAULT if $opts{newtemplate};
+say "";
+
 
 $opts{remove} = 1 if $opts{replace};
 $opts{remove} = 1 if $opts{onlyremove};
 $opts{replace} = 0 if $opts{onlyremove};
 $opts{interactive} = 0 if $opts{replace};
+
+
+say INFO2 . ">> REPLACE MODE ENABLED" . DEFAULT if $opts{replace};
+say INFO2 . ">> REMOVE MODE ENABLED" . DEFAULT if $opts{remove} || $opts{onlyremove};
+say "" if $opts{replace} || $opts{remove} || $opts{onlyremove};
+
 
 if (!@files)
 {
