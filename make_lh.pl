@@ -76,7 +76,7 @@ my %ext = ();
 
 if (-r $RC_FILE)
 {
-	open my $FH, "$ENV{HOME}/.lh_maker/rc" || die "Can't open rc file";
+	open my $FH, $RC_FILE || die "Can't open rc file";
 	while (<$FH>)
 	{
 		chomp;
