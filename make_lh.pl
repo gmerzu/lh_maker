@@ -30,6 +30,8 @@ sub print_help()
 	say "       -h|--help               this help";
 	say "       -c|--color              make output in color";
 	say "       -i|--interactive        work interactively";
+	say "       -I|--noninteractive     work non-interactively (default)";
+	say "       -f|--force              force add header when it seems to be present";
 	say "       -r|--remove             remove headers from the files";
 	say "       -R|--onlyremove         remove headers without adding new ones";
 	say "       -m|--replace            replace headers";
@@ -38,6 +40,7 @@ sub print_help()
 	say "       -n|--newtemplate=<file> use this template for replaced headers";
 	say "       -v|--vars=<file>        use this template for templates vars";
 	say "       -e|--ext=<extension>    treat all files as they have this extension";
+	say "       -p|--preserveall        preserve everything (implies -pva && -paa)";
 	say "       -pv|--preservevar=<var> preserve this variables from templates, can be passed multiple times";
 	say "       -pva|--preserveallvar   preserve all template variables";
 	say "       -pa|--preservearg=<arg> preserve this args from templates, can be passed multiple times";
@@ -55,6 +58,7 @@ sub min($$)
 my %opts = (help => 0,
 			color => 0,
 			interactive => 0,
+			force => 0,
 			template => "",
 			newtemplate => "",
 			vars => "",
@@ -193,6 +197,8 @@ GetOptions(\%opts,
 		"help|h",
 		"color|c",
 		"interactive|i",
+		"noninteractive|I" => sub { $opts{interactive} = 0 },
+		"force|f",
 		"template|t=s",
 		"newtemplate|n=s",
 		"vars|v=s",
@@ -201,6 +207,7 @@ GetOptions(\%opts,
 		"onlyremove|R",
 		"replace|m",
 		"reset|w",
+		"preserveall|p" => sub { $opts{preserveallvar} = 1; $opts{preserveallarg} = 1 },
 		"preservevar|pv=s" => \@preserve_vars,
 		"preserveallvar|pva",
 		"preservearg|pa=s" => \@preserve_args,
@@ -213,6 +220,7 @@ sub DEFAULT { ($opts{color} and RESET) || "" };
 sub INFO { ($opts{color} and GREEN) || "" };
 sub INFO2 { ($opts{color} and BLUE) || "" };
 sub INFO3 { ($opts{color} and BOLD . BLUE) || "" };
+sub NOTICE { ($opts{color} and MAGENTA) || "" };
 sub WARNING{ ($opts{color} and YELLOW) || "" };
 sub ERROR { ($opts{color} and RED) || "" };
 
@@ -280,6 +288,10 @@ $opts{remove} = 1 if $opts{onlyremove};
 $opts{replace} = 0 if $opts{onlyremove};
 #$opts{interactive} = 0 if $opts{replace};
 
+
+say INFO2 . ">> Work interactively" . DEFAULT if $opts{interactive};
+say INFO2 . ">> Force is enabled" . DEFAULT if $opts{force};
+say "" if $opts{interactive} || $opts{force};
 
 say INFO2 . ">> REPLACE MODE ENABLED" . DEFAULT if $opts{replace};
 say INFO2 . ">> REMOVE MODE ENABLED" . DEFAULT if $opts{remove} || $opts{onlyremove};
@@ -484,6 +496,7 @@ foreach my $f (@files)
 		open $FH, ">", $f or die ERROR . "!! Can't open $f for writing" . DEFAULT;
 		my $remove_mode = 1;
 		my $read_lines = 0;
+		my $count_removed = 0;
 
 		foreach my $line (@content)
 		{
@@ -512,6 +525,7 @@ foreach my $f (@files)
 
 			if ($to_remove)
 			{
+				$count_removed++;
 				next;
 			}
 			else
@@ -522,6 +536,15 @@ foreach my $f (@files)
 		}
 
 		close $FH;
+
+		if ($count_removed)
+		{
+			say NOTICE . "-- Something has been removed ($count_removed lines)" . DEFAULT;
+		}
+		else
+		{
+			say NOTICE . "** No any comment has been removed " . DEFAULT;
+		}
 
 		next if $opts{onlyremove};
 	}
@@ -568,9 +591,10 @@ foreach my $f (@files)
 									@content - 1)];
 	if ($check_header_str =~ /$f_short_origin/g)
 	{
-		say INFO3 . "** File $f seems to be with license" . DEFAULT;
+		print NOTICE . "** File $f seems to be with license, ";
 		$f_with_header = 1;
-		next unless $opts{interactive};
+		say "skip" . DEFAULT and next unless $opts{interactive} || $opts{force};
+		say "process anyway" . DEFAULT;
 	}
 
 	if ($opts{interactive} && ($f_with_header || !$f_with_header_firstly || $opts{reset}))

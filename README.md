@@ -19,6 +19,8 @@ Script to add/remove/modify license headers on project files.
        -h|--help               this help  
        -c|--color              make output in color  
        -i|--interactive        work interactively  
+       -I|--noninteractive     work non-interactively (default)  
+       -f|--force              force add header when it seems to be present  
        -r|--remove             remove headers from the files  
        -R|--onlyremove         remove headers without adding new ones  
        -m|--replace            replace headers  
@@ -27,6 +29,7 @@ Script to add/remove/modify license headers on project files.
        -n|--newtemplate=<file> use this template for replaced headers  
        -v|--vars=<file>        use this template for templates vars  
        -e|--ext=<extension>    treat all files as they have this extension  
+       -p|--preserveall        preserve everything (implies -pva && -paa)"  
        -pv|--preservevar=<var> preserve this variables from templates, can be passed multiple times  
        -pva|--preserveallvar   preserve all template variables  
        -pa|--preservearg=<arg> preserve this args from templates, can be passed multiple times  
