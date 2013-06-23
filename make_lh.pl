@@ -2,7 +2,7 @@
 # File:    make_lh.pl
 # Brief:   Script to add/remove/modify license headers on project files.
 # Author:  Anton Kozhemyachenko (gmerzu@gmail.com)
-# Version: 1.0
+# Version: 1.1
 # Created: June 21, 2013
 
 use v5.10; # I like say "say"
@@ -17,6 +17,9 @@ use File::Find;
 no warnings 'File::Find';
 
 
+my $VERSION = "1.1";
+
+
 $ENV{PATH} = "/bin:/usr/bin";
 my $RC_DIR = "$ENV{HOME}/.lh_maker";
 my $RC_FILE = "$RC_DIR/rc";
@@ -25,6 +28,7 @@ my $TEMPLATE_DIR = "$RC_DIR/templates";
 
 sub print_help()
 {
+	say "Version: $VERSION";
 	say "USE: $0 [options] [dir|file]...";
 	say "     options:";
 	say "       -h|--help               this help";
