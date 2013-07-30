@@ -76,10 +76,10 @@ Example:
 #### Template file ####
 
 Templates are located in the *~/.lh_maker/templates* directory.
-- Can containt script defined variables, such as file name, e.g. *@$FILE_SHORT@*.
-- Can containt variables from the **$vars** file, e.g. *@AUTHOR_NAME@*, *@DATE@*.
-- Can containt arguments passed to the script via **--arg** options, e.g. *@$ARG[ver]@*.
-- Can containt instructions to ask a user for a variable, e.g. *@$ASK[brief]@*.
+- Can contain script defined variables, such as file name, e.g. *@$FILE_SHORT@*.
+- Can contain variables from the **$vars** file, e.g. *@AUTHOR_NAME@*, *@DATE@*.
+- Can contain arguments passed to the script via **--arg** options, e.g. *@$ARG[ver]@*.
+- Can contain instructions to ask a user for a variable, e.g. *@$ASK[brief]@*.
 
 Example:
 
