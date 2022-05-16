@@ -4,6 +4,7 @@
 # Author:  Anton Kozhemyachenko (gmerzu@gmail.com)
 # Version: 1.1
 # Created: June 21, 2013
+# License: PUBLIC DOMAIN (http://unlicense.org)
 
 use v5.10; # I like say "say"
 use strict;
