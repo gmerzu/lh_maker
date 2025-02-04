@@ -1,4 +1,4 @@
 File:    @$FILE_SHORT@
-Author:  @AUTHOR_NAME@ (@AUTHOR_EMAIL@)
+Author:  @AUTHOR_NAME@ <@AUTHOR_EMAIL@>
 Created: @DATE@
 

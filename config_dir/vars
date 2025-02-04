@@ -1,4 +1,4 @@
 AUTHOR_NAME = Anton Kozhemyachenko
 AUTHOR_EMAIL = gmerzu@gmail.com
-DATE = $(env LANG=C date +"%B %d, %Y")
+DATE = $(env LANG=C date +"%b %d, %Y")
 
